@@ -35,5 +35,7 @@ int main(int argc, char **argv) {
         assert(fabs(x[i] - i - 1) < 1e-5);
     }
 
+    printf("Local solver test: PASSED\n");
+
     return EXIT_SUCCESS;
 }
