@@ -68,7 +68,7 @@ cs_di *construct_sparse_diag(int n, int num_diags, int *diag_numbers, double **d
         Ap[col+1] = Ap[col];
         for(diag_ind = 0; diag_ind < num_diags; diag_ind++) {
             row = col + diag_numbers[diag_ind];
-            if(row < 0 || row > n) { //This diagonal hasn't started/has ended
+            if(row < 0 || row >= n) { //This diagonal hasn't started/has ended
                 continue;
             }
             curr_val = diags[diag_ind][row];
