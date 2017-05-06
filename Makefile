@@ -1,18 +1,27 @@
 CC=gcc
-LIB_FLAGS=-lumfpack -lcxsparse
-CFLAGS=-Wall
+MPICC=mpicc
+LIB_FLAGS=-lumfpack -lcxsparse -lcholmod
+CFLAGS=-Wall -Wno-unused-function
 
-ALL: TESTS
+.PHONY: ALL NOTEST TEST clean
 
-NOTEST:
+ALL: NOTEST TESTS
 
-TESTS: solver_test diag_test
+NOTEST: domain_decomp
+
+TESTS: umfpack_test diag_test 
 
 clean:
-	rm -f solver_test diag_test 
+	rm -f umfpack_test diag_test cholmod_test domain_decomp
 
-solver_test: solver_test.c local_solvers.c
-	${CC} ${CFLAGS} ${LIB_FLAGS} solver_test.c -o solver_test; ./solver_test
+domain_decomp: domain_decomp.c local_solvers.c residue.c
+	${MPICC} ${CFLAGS} ${LIB_FLAGS} domain_decomp.c -o domain_decomp
+
+umfpack_test: umfpack_test.c local_solvers.c
+	${CC} ${CFLAGS} ${LIB_FLAGS} umfpack_test.c -o umfpack_test; ./umfpack_test
 
 diag_test: diag_test.c local_solvers.c
 	${CC} ${CFLAGS} ${LIB_FLAGS} diag_test.c -o diag_test; ./diag_test
+
+#cholmod_test: cholmod_test.c local_solvers.c
+#	${CC} ${CFLAGS} ${LIB_FLAGS} cholmod_test.c -o cholmod_test; ./cholmod_test
