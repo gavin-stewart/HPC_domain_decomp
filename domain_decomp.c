@@ -122,5 +122,13 @@ int main(int argc, char **argv) {
     MPI_Barrier(MPI_COMM_WORLD);
   }*/
   free(lresidual);
+  free(lu);
+  free(f);
+  free(lcorrection);
+  //TODO: Look for a function to free the laplace matrix
+  free(laplace_mat->p);
+  free(laplace_mat->i);
+  free(laplace_mat->x);
+  free(laplace_mat);
   MPI_Finalize();
 }

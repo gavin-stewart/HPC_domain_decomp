@@ -43,10 +43,11 @@ int umfpack_solve(cs_di *A, double *x, double *b) {
 
   umfpack_di_free_symbolic(&Symbolic);
 
-  return umfpack_di_solve(UMFPACK_A, Ap, Ai, Ax, x, b, Numeric, 
+  int ret_val = umfpack_di_solve(UMFPACK_A, Ap, Ai, Ax, x, b, Numeric, 
       (double*)NULL, (double*)NULL);
 
-  //umfpack_di_free_numeric(&Numeric);
+  umfpack_di_free_numeric(&Numeric);
+  return ret_val;
 }
 
 int cmp(const void *a, const void *b) {
@@ -142,7 +143,15 @@ cs_di *construct_sqr_laplace_mat(int n, double invhsq) {
   diags[3] = right_diag;
   diags[4] = up_diag;
 
-  return construct_sparse_diag(n_sqr, num_diags, diag_numbers, diags);
+  cs_di *to_return = construct_sparse_diag(n_sqr, num_diags, diag_numbers, diags);
+  free(diags);
+  free(diag_numbers);
+  free(up_diag);
+  free(left_diag);
+  free(right_diag);
+  free(down_diag);
+  free(center_diag);
+  return to_return;
 }
 
 /*

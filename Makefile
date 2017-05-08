@@ -1,7 +1,7 @@
 CC=gcc
 MPICC=mpicc
-LIB_FLAGS=-lumfpack -lcxsparse -lcholmod
-CFLAGS=-Wall -Wno-unused-function
+LIB_FLAGS=-lumfpack -lcxsparse -lcholmod -lm
+CFLAGS=-Wall -Wno-unused-function -g -O3
 
 .PHONY: ALL NOTEST TEST clean
 
