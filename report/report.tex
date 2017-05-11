@@ -145,7 +145,7 @@
 	
 	\includegraphics[scale=.4]{/Users/sanchit/Desktop/high_performace_computing/repository/finalproj/weak_scaling.jpg}
 	
-	As is evident from the plot the problem scales well. The increase in time is mostly because of increased communication because we are using a local solver(UMFPACK) to solve the poisson's equation locally which works in the same time as the local problem size is fixed.
+	As is evident from the plot the problem scales well. The increase in time is mostly because of increased communication because we are using a local solver (UMFPACK) to solve the Poisson's equation locally which works in the same time as the local problem size is fixed.
 	
 	\textbf{Strong Scaling}: The global grid is fixed at $3600\times3600$ and the number of processors are assumed to be a perfect square with $max iter=100$.
 	
@@ -154,7 +154,7 @@
 The plot suggests that the problem scales strongly almost perfectly. 
 	\section{Possible improvements}
 	\begin{itemize}
-\item	The strong scaling demonstrates that the convergence is very slow, both in time and in residual as well. This is in agreement with the theory that suggesgs that the converence is proportional to the overlap between the domains. So a possible improvement would be to implement the code that can tackle the overlapping domains. 
+\item	The strong scaling demonstrates that the convergence is very slow, both in time and in residual as well. This is in agreement with the theory that suggests that the convergence is proportional to the overlap between the domains. So a possible improvement would be to implement the code that can tackle the overlapping domains. 
 \item Another possible direction to improve would be to coupling the multigrid or multilevel methods to get a better convergence rate.
 \item Nonoverlapping method can be used as a preconditioner for GMRES or CG, so exploring this direction is another option for future studies.
 	\end{itemize}
