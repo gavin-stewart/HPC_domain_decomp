@@ -2,13 +2,31 @@
 
 \usepackage{fullpage}
 \usepackage{amsmath}
+\usepackage{hyperref}
 
 
 \title{Parallel domain decomposition in 2D}
 \author{Gavin Stewart and Sanchit Chaturvedi}
 
 \begin{document}
+	\maketitle
+	
 	\section{Introduction}
+	 
+	Elliptic problems are important in applied and mathematical physics.  The Poisson equation 
+	\begin{equation}
+		-\Delta u = f
+	\end{equation} describes the voltage \(u\) due to a charge distribution with density \(f\)%REF
+	, as well as describing the pressure in incompressible fluid flow \cite{Marshall97}. The Helmholtz equation
+	\begin{equation}
+		(-\Delta u + k^2)u = f
+	\end{equation} 
+	describes the propagation of electromagnetic or acoustic waves \cite{Fairweather03}.
+	
+	For large scale problems, it is desirable to parallelize the computation of solutions.  This is difficult for elliptic problems due to the strong coupling between unknowns when \(u\) is computed through finite difference or finite element methods.  Domain decomposition methods split the computational domain into several regions (which may or may not overlap), compute an estimate of the solution on each  subdomain, and then combine the solutions on each subdomain to get an estimate of the new solution.  The choice of boundary conditions for the subdomains varies between different methods%REF
+	; we will use a method with Dirichlet boundary conditions.
+	
+	The layout of the report is as follows: in section 2, we will describe the domain decomposition algorithm in detail.  In section 3, we will give weak and strong scaling results for an implementation of the algorithm with \(0\) overlap.  In section 4, we give an explanation for the slow convergence of the method, and suggest possible improvements to speed up the method.  Finally, section 5 gives an account of both authors' contributions to the project.
 	
 	\section{The algorithm}
 	
@@ -16,7 +34,23 @@
 	
 	\section{Possible improvements}
 	
+	\section{Author contributions}
+	
 	\begin{thebibliography}{9}
+		\bibitem{Marshall97}
+		Marshall, J., Adcroft, A., Hill, C., Perelman, L., \& Heisey, C.
+		(1997).
+		\emph{A finite-volume, incompressible Navier Stokes model for studies of the ocean on parallel computers}.
+		Journal of Geophysical Research 
+		102(C3), 5753--5766.
+		
+		\bibitem{Fairweather03}
+		Fairweather, G., Karageorghis, A., \& Martin, P.A.
+		(2003).
+		\emph{The method of fundamental solutions for scattering and radiation problems}.
+		Engineering analysis with boundary elements   
+		27(7), 759--769.
+		\url{https://doi.org/10.1016/S0955-7997(03)00017-1}
 		
 	\end{thebibliography}
 \end{document}
