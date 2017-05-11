@@ -1,7 +1,7 @@
 CC=gcc
 MPICC=mpicc
 LIB_FLAGS=-lumfpack -lcxsparse -lcholmod -lm
-CFLAGS=-Wall -Wno-unused-function -g -O3
+CFLAGS=-Wall -Wno-unused-function -g -O0
 
 .PHONY: ALL NOTEST TEST clean
 
@@ -14,7 +14,7 @@ TESTS: umfpack_test diag_test
 clean:
 	rm -f umfpack_test diag_test cholmod_test domain_decomp
 
-domain_decomp: domain_decomp.c local_solvers.c residue.c
+domain_decomp: domain_decomp.c local_solvers.c residue.c local_correction.c
 	${MPICC} ${CFLAGS} ${LIB_FLAGS} domain_decomp.c -o domain_decomp
 
 umfpack_test: umfpack_test.c local_solvers.c

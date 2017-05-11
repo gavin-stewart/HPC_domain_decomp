@@ -22,8 +22,8 @@ int umfpack_solve(cs_di *A, double *x, double *b) {
   int *Ap = A->p;
   int *Ai = A->i;
   double *Ax = A->x;
-  void *Symbolic = NULL;
-  void *Numeric = NULL;
+  void *Symbolic;
+  void *Numeric;
 
   int symb_status = umfpack_di_symbolic(n, n, Ap, Ai, Ax, &Symbolic, 
       (double*)NULL, (double*)NULL);
@@ -98,6 +98,62 @@ cs_di *construct_sparse_diag(int n, int num_diags, int *diag_numbers, double **d
   A->nz = -1;  //Compressed column
 
   return A;
+}
+
+cs_di *construct_laplace_mat(int nx, int ny, double invhsq) {
+  int size = nx * ny;
+  int row,col, ind;
+  int num_diags = 5; //Quindiagonal
+  int *diag_numbers = malloc(num_diags * sizeof(int));
+  double **diags = malloc(num_diags * sizeof(double*));
+
+  double *up_diag = calloc(size, sizeof(double));
+  double *left_diag = calloc(size, sizeof(double));
+  double *right_diag = calloc(size, sizeof(double));
+  double *down_diag = calloc(size, sizeof(double));
+  double *center_diag = calloc(size, sizeof(double));
+
+  for(row = 0; row < ny; row++) {
+    for(col = 0; col < nx; col++) {
+      ind = row * nx + col;
+      center_diag[ind] = 4 * invhsq;
+      if(row > 0) {
+        down_diag[ind - nx] = -invhsq;
+      }
+      if(row < ny - 1) {
+        up_diag[ind + nx] = -invhsq;
+      }
+      if(col > 0) {
+        left_diag[ind - 1] = -invhsq;
+      }
+      if(col < nx - 1) {
+        right_diag[ind + 1] = -invhsq;
+      }
+    }
+  }
+
+  diag_numbers[0] = -nx;
+  diag_numbers[1] = -1;
+  diag_numbers[2] = 0;
+  diag_numbers[3] = 1;
+  diag_numbers[4] = nx;
+
+  diags[0] = down_diag;
+  diags[1] = left_diag;
+  diags[2] = center_diag;
+  diags[3] = right_diag;
+  diags[4] = up_diag;
+
+  cs_di *to_return = construct_sparse_diag(size, num_diags, diag_numbers, diags);
+
+  free(diags);
+  free(diag_numbers);
+  free(up_diag);
+  free(left_diag);
+  free(right_diag);
+  free(down_diag);
+  free(center_diag);
+  return to_return;
 }
 
 cs_di *construct_sqr_laplace_mat(int n, double invhsq) {

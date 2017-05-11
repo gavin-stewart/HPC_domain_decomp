@@ -3,26 +3,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "local_solvers.c"
+#include "local_correction.c"
 #include "residue.c"
 
 #define TOL 1e-4
 #define DEBUG
 int main(int argc, char **argv) {
-  int iter, max_iter, num_proc, ppe, lN, N, mpi_rank, i;
+  int iter, max_iter, num_proc, ppe, lN, N, mpi_rank, i, overlap;
   double initial_resid_norm, resid_norm, h, invhsq;
   double *lresidual;
   double *lu;
   double *f;
-  double *lcorrection;
+  //double *lcorrection;
 
   MPI_Init(&argc, &argv);
 
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
   // Check for the right number of arguments
-  if(argc != 3) {
+  if(argc != 4) {
     if(mpi_rank == 0) {
-      fprintf(stderr, "Usage: %s <# local grid pts> <max iterations>\n", argv[0]);
+      fprintf(stderr, "Usage: %s <# local grid pts> <max iterations> <overlap>\n", argv[0]);
     }
     MPI_Finalize();
     return EXIT_FAILURE;
@@ -30,14 +30,15 @@ int main(int argc, char **argv) {
   
   lN = atoi(argv[1]);
   max_iter = atoi(argv[2]);
+  overlap = atoi(argv[3]);
 
   lu = calloc(lN * lN, sizeof(double));
   f = calloc(lN * lN, sizeof(double));
-  lcorrection = malloc(lN * lN * sizeof(double));
+  //lcorrection = malloc(lN * lN * sizeof(double));
 
   //TODO: Set f to something 'interesting'
   for(i = 0; i < lN * lN; i++) {
-    f[i] = 1;
+    f[i] = mpi_rank;
   }
   // Compute the number of processors per edge, check that the number of 
   // threads is a square.
@@ -55,7 +56,7 @@ int main(int argc, char **argv) {
   invhsq = 1.0 / (h * h);
 
   // Form the Laplace matrix
-  cs_di *laplace_mat = construct_sqr_laplace_mat(lN, invhsq);
+  cs_di *laplace_mat = NULL;
 
 
   // Compute the initial residual
@@ -73,15 +74,12 @@ int main(int argc, char **argv) {
   }*/
   if(mpi_rank == 0)
     printf("Initial residual: %f\n", initial_resid_norm);
+  MPI_Barrier(MPI_COMM_WORLD);
   #endif
   for(iter = 0; iter < max_iter && resid_norm > initial_resid_norm * TOL; iter++) {
-    // Solve the local system -(Laplace)correction = residual
-    umfpack_solve(laplace_mat, lcorrection, lresidual);
-    // Add the correction to lu
-    // TODO: Could move to function for clarity
-    for(i = 0; i < lN * lN; i++) {
-      lu[i] += lcorrection[i];
-    }
+    // Compute and apply the local correction
+    compute_local_correction(lu, lresidual, lN, overlap, ppe, &laplace_mat);
+    // TODO: Fix errors and allow an overlap > 0.
     // Compute the new lresidual, resid_norm
     free(lresidual);
     lresidual = residue(lu, f, lN, num_proc, invhsq,  mpi_rank);
@@ -106,6 +104,7 @@ int main(int argc, char **argv) {
       printf("Iteration [%d]: residual norm: %f\n", iter, resid_norm);
     #endif
   }
+  printf("Ended at %d iterations\n", iter);
   /*int turn;
   for(turn = 0; turn < num_proc; turn++) {
     if(mpi_rank==turn) {
@@ -124,7 +123,7 @@ int main(int argc, char **argv) {
   free(lresidual);
   free(lu);
   free(f);
-  free(lcorrection);
+  //free(lcorrection);
   //TODO: Look for a function to free the laplace matrix
   free(laplace_mat->p);
   free(laplace_mat->i);
